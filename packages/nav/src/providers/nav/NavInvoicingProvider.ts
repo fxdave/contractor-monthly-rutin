@@ -76,6 +76,7 @@ export class NavInvoicingProvider {
     const data = applyModifications(template, mods);
     const xml = buildNavXml(data);
     const transactionId = await this._nav.manageInvoice(xml, "CREATE");
+    this._invoiceRepo.saveInvoice(data.invoiceNumber, xml);
     return { transactionId, invoiceNumber: data.invoiceNumber };
   }
 

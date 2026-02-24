@@ -179,7 +179,7 @@ table.lines thead th {
 }
 table.lines tbody td {
   padding: 2.5mm 3mm; border-bottom: 1px solid #f0f0f0;
-  font-size: 9.5pt; vertical-align: middle;
+  font-size: 9.5pt; vertical-align: middle; white-space: nowrap;
 }
 table.lines tbody tr:last-child td { border-bottom: none; }
 .r { text-align: right; }
@@ -189,7 +189,7 @@ table.lines tbody tr:last-child td { border-bottom: none; }
 .summary-outer { width: 100%; border-collapse: collapse; margin-bottom: 7mm; }
 .summary-spacer { width: 52%; }
 table.summary { width: 100%; border-collapse: collapse; }
-table.summary td { padding: 1.5mm 3mm; font-size: 10pt; }
+table.summary td { padding: 1.5mm 3mm; font-size: 10pt; white-space: nowrap; }
 table.summary td:last-child { text-align: right; min-width: 42mm; }
 table.summary tr.sub td { font-size: 9pt; color: #777; }
 table.summary tr.gross { border-top: 1.5px solid #1a1a1a; font-weight: bold; font-size: 11pt; }
