@@ -68,13 +68,14 @@ async function main() {
   console.log();
 
   const { templateNumber, nextNumber } = await service.getNextInvoiceNumber();
-  const { netAmount, vatAmount, grossAmount, issueDate, deliveryDate } =
+  const { netAmount, vatAmount, grossAmount, issueDate, deliveryDate, paymentDate } =
     service.calculateInvoice(quantity, unitPrice, vatRate);
 
   console.log(`Template:      ${templateNumber}`);
   console.log(`Invoice:       ${nextNumber}`);
   console.log(`Issue date:    ${issueDate}`);
   console.log(`Delivery date: ${deliveryDate}`);
+  console.log(`Payment due:   ${paymentDate}`);
   console.log(`Quantity:      ${quantity} ora`);
   console.log(`Unit price:    ${unitPrice.toLocaleString("hu-HU")} HUF`);
   console.log(`Net:           ${netAmount.toLocaleString("hu-HU")} HUF`);
@@ -99,6 +100,7 @@ async function main() {
     invoiceNumber: nextNumber,
     issueDate,
     deliveryDate,
+    paymentDate,
     templateNumber,
   });
 

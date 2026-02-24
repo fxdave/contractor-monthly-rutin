@@ -28,13 +28,15 @@ export class InvoiceService {
   calculateInvoice(
     quantity: number,
     unitPrice: number,
-    vatRate: number
+    vatRate: number,
+    paymentDays: number = 30,
   ): {
     netAmount: number;
     vatAmount: number;
     grossAmount: number;
     issueDate: string;
     deliveryDate: string;
+    paymentDate: string;
   } {
     const { netAmount, vatAmount, grossAmount } = lineAmounts({
       lineNumber: 1, description: "", quantity, unitPrice, vatRate,
@@ -44,7 +46,10 @@ export class InvoiceService {
     const deliveryDate = new Date(today.getFullYear(), today.getMonth(), 0)
       .toISOString()
       .slice(0, 10);
-    return { netAmount, vatAmount, grossAmount, issueDate, deliveryDate };
+    const paymentDeadline = new Date(today);
+    paymentDeadline.setDate(paymentDeadline.getDate() + paymentDays);
+    const paymentDate = paymentDeadline.toISOString().slice(0, 10);
+    return { netAmount, vatAmount, grossAmount, issueDate, deliveryDate, paymentDate };
   }
 
   async createInvoice(opts: {
@@ -53,6 +58,7 @@ export class InvoiceService {
     invoiceNumber: string;
     issueDate: string;
     deliveryDate: string;
+    paymentDate: string;
     templateNumber: string;
   }): Promise<{ transactionId: string; invoiceNumber: string }> {
     const templateData = await this._provider.getInvoiceData(opts.templateNumber);
@@ -60,7 +66,7 @@ export class InvoiceService {
       invoiceNumber: opts.invoiceNumber,
       issueDate: opts.issueDate,
       deliveryDate: opts.deliveryDate,
-      paymentDate: null,
+      paymentDate: opts.paymentDate,
       lines: [{ lineNumber: 1, quantity: opts.quantity, unitPrice: opts.unitPrice }],
     });
   }

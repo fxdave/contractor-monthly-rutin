@@ -97,6 +97,7 @@ if (!existsSync(PRODUCTS_FILE)) {
       description: "Software development",
       unitPrice: 0,
       vatRate: 0.27,
+      paymentDays: 30,
       unitOfMeasure: "OWN",
       unitOfMeasureOwn: "hour",
     },

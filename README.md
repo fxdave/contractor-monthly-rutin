@@ -60,13 +60,19 @@ make start
 make download FROM=2019
 make download FROM=2019 TO=2020
 
-# Create invoice (interactive 2-step confirmation)
+# Create invoice
+# ⚠️ I'm brave enough but I'm not responsible for your decisions.
+# ✅ 2-step confirmation, it sends only when you agree.
 make create QUANTITY=40
 
 # Storno an invoice
+# ⚠️ I'm brave enough but I'm not responsible for your decisions.
+# ✅ 2-step confirmation, it sends only when you agree.
 make storno INVOICE=2026-000005
 
 # Render invoice to HTML + PDF
+# ⚠️ I'm brave enough but I'm not responsible for your decisions.
+# ✅ No sending involved, it just generates HTML + PDF.
 make render INVOICE=2026-000005
 
 # Typecheck all packages

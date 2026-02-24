@@ -34,6 +34,7 @@ interface Product {
   description: string;
   unitPrice: number;
   vatRate: number;
+  paymentDays?: number;
   unitOfMeasure?: string;
   unitOfMeasureOwn?: string;
 }
@@ -80,6 +81,7 @@ async function handleCreateInvoice() {
   let unitPrice: number;
   let vatRate: number;
   let description: string;
+  let paymentDays = 30;
   let unitOfMeasureOwn: string | undefined;
 
   if (products.length > 0) {
@@ -102,6 +104,7 @@ async function handleCreateInvoice() {
       vatRate = product.vatRate;
       description = product.description;
       unitOfMeasureOwn = product.unitOfMeasureOwn;
+      if (product.paymentDays != null) paymentDays = product.paymentDays;
     }
   } else {
     description = await input({ message: "Megnevezés:" });
@@ -140,14 +143,15 @@ async function handleCreateInvoice() {
   }
 
   const { templateNumber, nextNumber } = await service.getNextInvoiceNumber();
-  const { netAmount, vatAmount, grossAmount, issueDate, deliveryDate } =
-    service.calculateInvoice(quantity, unitPrice, vatRate);
+  const { netAmount, vatAmount, grossAmount, issueDate, deliveryDate, paymentDate } =
+    service.calculateInvoice(quantity, unitPrice, vatRate, paymentDays);
 
   console.log();
   console.log(`Sablon:        ${templateNumber}`);
   console.log(`Számla:        ${nextNumber}`);
   console.log(`Kelte:         ${issueDate}`);
   console.log(`Teljesítés:    ${deliveryDate}`);
+  console.log(`Fiz. határidő: ${paymentDate}`);
   console.log(`Mennyiség:     ${quantity} ${unitOfMeasureOwn ?? "db"}`);
   console.log(`Egységár:      ${unitPrice.toLocaleString("hu-HU")} HUF`);
   console.log(`Nettó:         ${netAmount.toLocaleString("hu-HU")} HUF`);
@@ -166,7 +170,7 @@ async function handleCreateInvoice() {
     invoiceNumber: nextNumber,
     issueDate,
     deliveryDate,
-    paymentDate: null,
+    paymentDate,
     lines: [{
       lineNumber: 1,
       quantity,
