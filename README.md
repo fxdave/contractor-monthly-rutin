@@ -1,4 +1,4 @@
-# nav-invoicing
+# contractor-monthly-rutin
 
 Simple automation of invoicing for developer contractors.
 
