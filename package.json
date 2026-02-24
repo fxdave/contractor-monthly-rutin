@@ -1,0 +1,19 @@
+{
+  "name": "nav-invoicing",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "npm@11.4.2",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck": "turbo typecheck",
+    "start": "npm start --workspace=tui"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.4",
+    "typescript": "^5.9.3"
+  }
+}

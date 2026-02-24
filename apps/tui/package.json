@@ -1,0 +1,20 @@
+{
+  "name": "tui",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx src/main.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "nav": "*",
+    "clockify": "*",
+    "otp": "*",
+    "@inquirer/prompts": "^7.3.2",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

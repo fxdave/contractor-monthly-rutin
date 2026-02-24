@@ -1,1 +1,7 @@
-.env.hours
+.env
+.env*
+!.env.example
+node_modules
+data/
+requestId-counter.json
+.turbo
