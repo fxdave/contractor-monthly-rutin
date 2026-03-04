@@ -1,7 +1,14 @@
 import { config } from "dotenv";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { existsSync, copyFileSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import {
+  existsSync,
+  copyFileSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+} from "node:fs";
+import { execSync } from "node:child_process";
 import type { NavConfig, SupplierExtras } from "nav";
 import type { ClockifyConfig } from "clockify";
 import type { OtpConfig } from "otp";
@@ -11,14 +18,22 @@ const ROOT_DIR = join(__dirname, "../../..");
 
 config({ path: join(ROOT_DIR, ".env") });
 
-function requireEnv(name: string): string {
-  const val = process.env[name];
-  if (!val) throw new Error(`${name} is required in .env`);
+function resolveValue(val: string): string {
+  if (val.startsWith("command:")) {
+    return execSync(val.slice("command:".length), { encoding: "utf8" }).trim();
+  }
   return val;
 }
 
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (!val) throw new Error(`${name} is required in .env`);
+  return resolveValue(val);
+}
+
 function optionalEnv(name: string): string | undefined {
-  return process.env[name] || undefined;
+  const val = process.env[name] || undefined;
+  return val ? resolveValue(val) : undefined;
 }
 
 export function loadNavConfig(): NavConfig {
@@ -31,9 +46,10 @@ export function loadNavConfig(): NavConfig {
     technicalUserPass: requireEnv("NAV_TECHNICAL_USER_PASS"),
     signKey: requireEnv("NAV_XML_SIGNING_KEY"),
     exchangeKey: requireEnv("NAV_XML_EXCHANGE_KEY"),
-    baseUrl: optionalEnv("NAV_MODE") === "production"
-      ? "https://api.onlineszamla.nav.gov.hu/invoiceService/v3"
-      : "https://api-test.onlineszamla.nav.gov.hu/invoiceService/v3",
+    baseUrl:
+      optionalEnv("NAV_MODE") === "production"
+        ? "https://api.onlineszamla.nav.gov.hu/invoiceService/v3"
+        : "https://api-test.onlineszamla.nav.gov.hu/invoiceService/v3",
     software: {
       softwareId,
       softwareName: optionalEnv("NAV_SOFTWARE_NAME") ?? "Invoice Manager",
@@ -57,10 +73,18 @@ export function loadNavConfig(): NavConfig {
 export function loadClockifyConfig(): ClockifyConfig {
   const clockifyFile = join(CONFIG_DIR, "clockify.json");
   if (!existsSync(clockifyFile)) {
-    writeFileSync(clockifyFile, JSON.stringify({
-      defaultRate: 0,
-      rateOverrides: [],
-    }, null, 2) + "\n", "utf8");
+    writeFileSync(
+      clockifyFile,
+      JSON.stringify(
+        {
+          defaultRate: 0,
+          rateOverrides: [],
+        },
+        null,
+        2,
+      ) + "\n",
+      "utf8",
+    );
   }
   const rates = JSON.parse(readFileSync(clockifyFile, "utf8"));
   return {
@@ -72,7 +96,11 @@ export function loadClockifyConfig(): ClockifyConfig {
 
 export function loadOtpConfig(): OtpConfig {
   return {
-    downloadDir: optionalEnv("OTP_DOWNLOAD_DIR") ?? join(ROOT_DIR, "downloads"),
+    downloadDir:
+      optionalEnv("OTP_DOWNLOAD_DIR") ?? join(ROOT_DIR, "./data/db/downloads"),
+    userId: requireEnv("OTP_USER_ID"),
+    accountNumber: requireEnv("OTP_ACCOUNT_NUMBER"),
+    password: requireEnv("OTP_PASSWORD"),
   };
 }
 
@@ -91,17 +119,25 @@ mkdirSync(INVOICES_DIR, { recursive: true });
 
 const PRODUCTS_FILE = join(CONFIG_DIR, "products.json");
 if (!existsSync(PRODUCTS_FILE)) {
-  writeFileSync(PRODUCTS_FILE, JSON.stringify([
-    {
-      id: "dev-hours",
-      description: "Software development",
-      unitPrice: 0,
-      vatRate: 0.27,
-      paymentDays: 30,
-      unitOfMeasure: "OWN",
-      unitOfMeasureOwn: "hour",
-    },
-  ], null, 2) + "\n", "utf8");
+  writeFileSync(
+    PRODUCTS_FILE,
+    JSON.stringify(
+      [
+        {
+          id: "dev-hours",
+          description: "Software development",
+          unitPrice: 0,
+          vatRate: 0.27,
+          paymentDays: 30,
+          unitOfMeasure: "OWN",
+          unitOfMeasureOwn: "hour",
+        },
+      ],
+      null,
+      2,
+    ) + "\n",
+    "utf8",
+  );
 }
 
 const PARTNERS_FILE = join(CONFIG_DIR, "partners.json");

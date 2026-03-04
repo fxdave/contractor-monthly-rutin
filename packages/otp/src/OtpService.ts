@@ -1,4 +1,7 @@
 import { chromium, type Page } from "playwright";
+import jsQR from "jsqr";
+import { PNG } from "pngjs";
+import QRCode from "qrcode";
 
 const LOGIN_URL = "https://www.otpbank.hu/portal/hu/OTPdirekt/Belepes";
 const ACCOUNT_STATEMENT_URL =
@@ -6,18 +9,17 @@ const ACCOUNT_STATEMENT_URL =
 
 export interface OtpConfig {
   downloadDir: string;
+  userId: string;
+  accountNumber: string;
+  password: string;
 }
 
 export class OtpService {
   constructor(private _config: OtpConfig) {}
 
-  async downloadStatement(month: string, credentials: {
-    azonosito: string;
-    szamlaszam: string;
-    jelszo: string;
-  }): Promise<string> {
+  async downloadStatement(month: string): Promise<string> {
     const browser = await chromium.launch({
-      headless: false,
+      headless: true,
       slowMo: 100,
     });
 
@@ -30,7 +32,7 @@ export class OtpService {
     try {
       await page.goto(LOGIN_URL, { waitUntil: "networkidle" });
       await this._acceptCookies(page);
-      await this._login(page, credentials.azonosito, credentials.szamlaszam, credentials.jelszo);
+      await this._login(page, this._config.userId, this._config.accountNumber, this._config.password);
 
       const statementNumber = OtpService.getStatementNumber(month);
       const filePath = await this._downloadAccountStatement(page, statementNumber);
@@ -78,7 +80,7 @@ export class OtpService {
     await szamlaszamField.click();
     await page.waitForTimeout(500);
     await szamlaszamField.clear();
-    await szamlaszamField.pressSequentially(szamlaszam, { delay: 100 });
+    await szamlaszamField.pressSequentially(szamlaszam.replace(/^117/, ""), { delay: 100 });
 
     await page.waitForTimeout(500);
     const jelszoField = page.locator("#account_number_password");
@@ -92,10 +94,28 @@ export class OtpService {
     await loginButton.click();
 
     await page.waitForSelector("#qrToken", { timeout: 30000 });
-    console.log("QR code appeared! Please scan it with your mobile app...");
+    await this._showQrInTerminal(page);
 
     await page.waitForSelector("text=Üdvözöljük", { timeout: 120000 });
     await page.waitForTimeout(12000);
+  }
+
+  private async _showQrInTerminal(page: Page): Promise<void> {
+    try {
+      const qrElement = page.locator("#qrToken");
+      const pngBuffer = await qrElement.screenshot();
+      const png = PNG.sync.read(pngBuffer);
+      const qrData = jsQR(new Uint8ClampedArray(png.data), png.width, png.height);
+      if (qrData) {
+        const terminalQr = await QRCode.toString(qrData.data, { type: "terminal", small: true });
+        console.log("\nScan this QR code with your mobile app:\n");
+        console.log(terminalQr);
+      } else {
+        console.log("QR code appeared! Please scan it in the browser...");
+      }
+    } catch {
+      console.log("QR code appeared! Please scan it in the browser...");
+    }
   }
 
   private async _downloadAccountStatement(page: Page, statementNumber: string): Promise<string> {
