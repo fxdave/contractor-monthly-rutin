@@ -20,6 +20,7 @@ async function main() {
   const defaultMonth = `${prevYear}-${String(prevMonth).padStart(2, "0")}`;
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
+  rl.on("SIGINT", () => process.exit(130));
   const month = await new Promise<string>((resolve) =>
     rl.question(`Month (YYYY-MM) [${defaultMonth}]: `, (answer) =>
       resolve(answer.trim() || defaultMonth)

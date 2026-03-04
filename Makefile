@@ -45,9 +45,9 @@ otp-downloadStatement:
 	npx tsx apps/tui/src/scripts/download-statement.ts
 
 rutin:
-	make clockify-getPreviousMonthReport \
-	nav-createXml \
-	nav-lastXml-review \
-	nav-lastXml-send \
-	nav-lastXml-renderPdf \
-	otp-downloadStatement
+	@make --no-print-directory clockify-getPreviousMonthReport && \
+	make --no-print-directory nav-createXml && \
+	make --no-print-directory nav-lastXml-review && \
+	make --no-print-directory nav-lastXml-send && \
+	make --no-print-directory nav-lastXml-renderPdf && \
+	make --no-print-directory otp-downloadStatement

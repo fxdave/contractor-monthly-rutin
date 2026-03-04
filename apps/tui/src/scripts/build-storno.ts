@@ -18,6 +18,7 @@ function listLocalInvoices(): string[] {
 }
 
 const rl = createInterface({ input: process.stdin, output: process.stdout });
+rl.on("SIGINT", () => process.exit(130));
 
 function ask(prompt: string): Promise<string> {
   return new Promise((resolve) =>

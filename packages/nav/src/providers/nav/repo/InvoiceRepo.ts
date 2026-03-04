@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "path";
 
 export class InvoiceRepo {
@@ -61,6 +61,10 @@ export class InvoiceRepo {
     const idx = invoiceDirs.indexOf(invoiceNumber);
     if (idx <= 0) return null;
     return invoiceDirs[idx - 1];
+  }
+
+  clearDraft(): void {
+    rmSync(path.join(this._invoicesFolderPath, "draft"), { recursive: true, force: true });
   }
 
   async getNextInvoiceNumber(lastNumber?: string): Promise<string> {

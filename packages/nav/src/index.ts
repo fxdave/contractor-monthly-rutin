@@ -18,3 +18,4 @@ export type { NavConfig, SupplierExtras } from "./providers/nav/config.js";
 export { NavInvoicingProvider } from "./providers/nav/NavInvoicingProvider.js";
 export { InvoiceService } from "./InvoiceService.js";
 export { InvoiceRepo } from "./providers/nav/repo/InvoiceRepo.js";
+export { parseNavXml } from "./providers/nav/xml/parse.js";

@@ -9,6 +9,7 @@ async function main() {
   const defaultMonth = OtpService.getLastMonthString();
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
+  rl.on("SIGINT", () => process.exit(130));
   const month = await new Promise<string>((resolve) =>
     rl.question(`Month (YYYY-MM) [${defaultMonth}]: `, (answer) =>
       resolve(answer.trim() || defaultMonth)

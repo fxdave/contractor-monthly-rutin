@@ -16,7 +16,7 @@ import type { OtpConfig } from "otp";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "../../..");
 
-config({ path: join(ROOT_DIR, ".env") });
+config({ path: join(ROOT_DIR, ".env"), quiet: true });
 
 function resolveValue(val: string): string {
   if (val.startsWith("command:")) {

@@ -1,4 +1,3 @@
-import { createInterface } from "node:readline";
 import { NavInvoicingProvider, InvoiceRepo, computeSummary, lineAmounts } from "nav";
 import type { InvoiceData, TaxNumber, SimpleAddress, SupplierExtras } from "nav";
 import { loadNavConfig, INVOICES_DIR, COUNTER_FILE } from "../config.js";
@@ -118,19 +117,12 @@ async function main() {
   const invoiceRepo = new InvoiceRepo(INVOICES_DIR);
   const provider = new NavInvoicingProvider(navConfig, COUNTER_FILE, invoiceRepo);
 
-  const lastInvoice = await provider.getLastInvoiceFile();
-  const defaultNumber = lastInvoice.number;
+  const hasDraft = invoiceRepo.hasInvoice("draft");
+  const defaultNumber = hasDraft
+    ? "draft"
+    : (await provider.getLastInvoiceFile()).number;
 
-  let invoiceNumber = process.argv[2];
-  if (!invoiceNumber) {
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    invoiceNumber = await new Promise<string>((resolve) =>
-      rl.question(`Invoice [${defaultNumber}]: `, (answer) =>
-        resolve(answer.trim() || defaultNumber)
-      )
-    );
-    rl.close();
-  }
+  const invoiceNumber = process.argv[2] || defaultNumber;
 
   const data = await provider.getInvoiceData(invoiceNumber);
   printReview(data, navConfig.supplierExtras);

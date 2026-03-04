@@ -87,16 +87,27 @@ export class NavInvoicingProvider {
   ): { invoiceNumber: string } {
     const data = applyModifications(template, mods);
     const xml = buildNavXml(data);
-    this._invoiceRepo.saveInvoice(data.invoiceNumber, xml);
+    this._invoiceRepo.clearDraft();
+    this._invoiceRepo.saveInvoice("draft", xml);
     return { invoiceNumber: data.invoiceNumber };
   }
 
-  async sendInvoice(invoiceNumber: string): Promise<{ transactionId: string }> {
+  async sendInvoice(invoiceNumber: string): Promise<{ transactionId: string; invoiceNumber: string }> {
     const xml = this._invoiceRepo.readInvoice(invoiceNumber);
     const operation = xml.includes("<invoiceReference>") ? "STORNO" : "CREATE";
     const transactionId = await this._nav.manageInvoice(xml, operation);
+
+    if (invoiceNumber === "draft") {
+      const data = await parseNavXml(xml);
+      const realNumber = data.invoiceNumber;
+      this._invoiceRepo.saveInvoice(realNumber, xml);
+      this._invoiceRepo.markSent(realNumber, transactionId);
+      this._invoiceRepo.clearDraft();
+      return { transactionId, invoiceNumber: realNumber };
+    }
+
     this._invoiceRepo.markSent(invoiceNumber, transactionId);
-    return { transactionId };
+    return { transactionId, invoiceNumber };
   }
 
   async buildStornoInvoice(invoiceNumber: string): Promise<{ stornoNumber: string }> {
@@ -104,7 +115,8 @@ export class NavInvoicingProvider {
     const stornoNumber = await this._invoiceRepo.getNextInvoiceNumber();
     const stornoDate = new Date().toISOString().slice(0, 10);
     const xml = buildStornoXml(stornoNumber, stornoDate, data);
-    this._invoiceRepo.saveInvoice(stornoNumber, xml);
+    this._invoiceRepo.clearDraft();
+    this._invoiceRepo.saveInvoice("draft", xml);
     return { stornoNumber };
   }
 
