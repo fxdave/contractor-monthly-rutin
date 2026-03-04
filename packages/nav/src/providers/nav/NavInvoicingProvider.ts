@@ -44,6 +44,7 @@ export class NavInvoicingProvider {
     if (!this._invoiceRepo.hasInvoice(invoiceNumber)) {
       const rawXml = await this._nav.queryInvoiceData(invoiceNumber);
       this._invoiceRepo.saveInvoice(invoiceNumber, rawXml);
+      this._invoiceRepo.markSent(invoiceNumber, "downloaded");
     }
   }
 
@@ -80,6 +81,33 @@ export class NavInvoicingProvider {
     return { transactionId, invoiceNumber: data.invoiceNumber };
   }
 
+  buildInvoice(
+    template: InvoiceData,
+    mods: InvoiceModifications
+  ): { invoiceNumber: string } {
+    const data = applyModifications(template, mods);
+    const xml = buildNavXml(data);
+    this._invoiceRepo.saveInvoice(data.invoiceNumber, xml);
+    return { invoiceNumber: data.invoiceNumber };
+  }
+
+  async sendInvoice(invoiceNumber: string): Promise<{ transactionId: string }> {
+    const xml = this._invoiceRepo.readInvoice(invoiceNumber);
+    const operation = xml.includes("<invoiceReference>") ? "STORNO" : "CREATE";
+    const transactionId = await this._nav.manageInvoice(xml, operation);
+    this._invoiceRepo.markSent(invoiceNumber, transactionId);
+    return { transactionId };
+  }
+
+  async buildStornoInvoice(invoiceNumber: string): Promise<{ stornoNumber: string }> {
+    const data = await this.getInvoiceData(invoiceNumber);
+    const stornoNumber = await this._invoiceRepo.getNextInvoiceNumber();
+    const stornoDate = new Date().toISOString().slice(0, 10);
+    const xml = buildStornoXml(stornoNumber, stornoDate, data);
+    this._invoiceRepo.saveInvoice(stornoNumber, xml);
+    return { stornoNumber };
+  }
+
   async stornoInvoice(invoiceNumber: string): Promise<CreateInvoiceResult> {
     const data = await this.getInvoiceData(invoiceNumber);
     const stornoNumber = await this._invoiceRepo.getNextInvoiceNumber();
@@ -106,6 +134,7 @@ export class NavInvoicingProvider {
       }
       const rawXml = await this._nav.queryInvoiceData(num);
       this._invoiceRepo.saveInvoice(num, rawXml);
+      this._invoiceRepo.markSent(num, "downloaded");
       saved.push(num);
     }
 
@@ -144,6 +173,7 @@ export class NavInvoicingProvider {
           try {
             const rawXml = await this._nav.queryInvoiceData(num);
             this._invoiceRepo.saveInvoice(num, rawXml);
+            this._invoiceRepo.markSent(num, "downloaded");
             totalSaved++;
           } catch {
             totalFailed++;

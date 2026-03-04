@@ -42,13 +42,13 @@ export class InvoiceService {
       lineNumber: 1, description: "", quantity, unitPrice, vatRate,
     });
     const today = new Date();
-    const issueDate = today.toISOString().slice(0, 10);
-    const deliveryDate = new Date(today.getFullYear(), today.getMonth(), 0)
-      .toISOString()
-      .slice(0, 10);
+    const fmt = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const issueDate = fmt(today);
+    const deliveryDate = fmt(new Date(today.getFullYear(), today.getMonth(), 0));
     const paymentDeadline = new Date(today);
     paymentDeadline.setDate(paymentDeadline.getDate() + paymentDays);
-    const paymentDate = paymentDeadline.toISOString().slice(0, 10);
+    const paymentDate = fmt(paymentDeadline);
     return { netAmount, vatAmount, grossAmount, issueDate, deliveryDate, paymentDate };
   }
 
@@ -69,6 +69,33 @@ export class InvoiceService {
       paymentDate: opts.paymentDate,
       lines: [{ lineNumber: 1, quantity: opts.quantity, unitPrice: opts.unitPrice }],
     });
+  }
+
+  async buildInvoice(opts: {
+    quantity: number;
+    unitPrice: number;
+    invoiceNumber: string;
+    issueDate: string;
+    deliveryDate: string;
+    paymentDate: string;
+    templateNumber: string;
+  }): Promise<{ invoiceNumber: string }> {
+    const templateData = await this._provider.getInvoiceData(opts.templateNumber);
+    return this._provider.buildInvoice(templateData, {
+      invoiceNumber: opts.invoiceNumber,
+      issueDate: opts.issueDate,
+      deliveryDate: opts.deliveryDate,
+      paymentDate: opts.paymentDate,
+      lines: [{ lineNumber: 1, quantity: opts.quantity, unitPrice: opts.unitPrice }],
+    });
+  }
+
+  async sendInvoice(invoiceNumber: string): Promise<{ transactionId: string }> {
+    return this._provider.sendInvoice(invoiceNumber);
+  }
+
+  async buildStornoInvoice(invoiceNumber: string): Promise<{ stornoNumber: string }> {
+    return this._provider.buildStornoInvoice(invoiceNumber);
   }
 
   async stornoInvoice(

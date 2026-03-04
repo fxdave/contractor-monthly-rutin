@@ -6,13 +6,10 @@ Integrates with the Hungarian [NAV Online Szamla API v3](https://onlineszamla.na
 
 ## Features
 
-- Issue invoices to NAV with 2-step confirmation
-- Storno existing invoices
-- Download all submitted invoices as XML
-- Render invoices to HTML and PDF
-- Clockify monthly hours and billing summary
-- OTP Bank statement download (Playwright)
-- Interactive TUI menu and CLI scripts
+- **Download past invoice** xmls from NAV and generate invoice template from it for a quick start
+- **Create/Storno invoices** using templates and overrides with NAV integration
+- **Reads clockify** and can calculate final price based on the configurable hourly rates/project
+- **Download account statement** from OTP's smart bank (the old one)
 
 ## Prerequisites
 
@@ -21,70 +18,49 @@ Integrates with the Hungarian [NAV Online Szamla API v3](https://onlineszamla.na
 - (Optional) [weasyprint](https://weasyprint.org/) on PATH for PDF rendering
 - (Optional) Clockify API key
 
-## Installation
+## Usage
 
 ```bash
-make install       # npm install + creates .env from .env.example
+# For installation
+make install                          # npm install + creates .env from .env.example
+make download FROM=2019               # Download invoices from NAV from 2019
+make download FROM=2019 TO=2020       # Download invoices from NAV from 2019 to 2020
+make generate-default-template        # initialize templates from downloaded invoices
+
+# Interactive menu (TUI)
+make start
+
+# invoicing
+make clockify-getPreviousMonthReport  # Check hours + billing summary
+make nav-createXml                    # Build invoice XML locally (no NAV send)
+make nav-createStornoXml              # Build invoice XML locally (no NAV send)
+make nav-lastXml-review               # Review the saved invoice XML
+make nav-lastXml-send                 # Submit to NAV ⚠️(ensure compliance with law)
+make nav-lastXml-renderPdf            # Render to HTML + PDF ⚠️(ensure compliance with law)
+make otp-downloadStatement            # Download bank statement
 ```
 
-Fill in your NAV credentials in `.env`, then generate the default invoice template:
+### Monthly rutin in one command
 
 ```bash
-make generate-default-template
+# ⚠️ I'm brave enough but I'm not responsible for your decisions.
+# ✅ y/N confirmation, it sends only when you agree.
+make clockify-getPreviousMonthReport nav-createXml nav-lastXml-review nav-lastXml-send nav-lastXml-renderPdf otp-downloadStatement
 ```
 
 ## Configuration
 
 All runtime data lives in `data/` (gitignored):
 
-| File | Purpose |
-|------|---------|
+| File                        | Purpose                                            |
+| --------------------------- | -------------------------------------------------- |
+| `.env`                      | credentials or basic config                        |
 | `data/config/products.json` | Product definitions (description, price, VAT rate) |
-| `data/config/partners.json` | Customer definitions |
-| `data/config/clockify.json` | Clockify billing rates and overrides |
-| `data/config/templates/` | Invoice templates (generated from latest invoice) |
-| `data/db/invoices/` | Downloaded XMLs, rendered HTMLs, and PDFs |
-
-## Usage
-
-### TUI (interactive menu)
-
-```bash
-make start
-```
-
-### CLI
-
-```bash
-# Download invoices from NAV
-make download FROM=2019
-make download FROM=2019 TO=2020
-
-# Create invoice
-# ⚠️ I'm brave enough but I'm not responsible for your decisions.
-# ✅ 2-step confirmation, it sends only when you agree.
-make create QUANTITY=40
-
-# Storno an invoice
-# ⚠️ I'm brave enough but I'm not responsible for your decisions.
-# ✅ 2-step confirmation, it sends only when you agree.
-make storno INVOICE=2026-000005
-
-# Render invoice to HTML + PDF
-# ⚠️ I'm brave enough but I'm not responsible for your decisions.
-# ✅ No sending involved, it just generates HTML + PDF.
-make render INVOICE=2026-000005
-
-# Typecheck all packages
-make typecheck
-```
-
-### Direct script execution
-
-```bash
-npx tsx apps/tui/src/scripts/create-invoice.ts <quantity> [product-id]
-npx tsx apps/tui/src/scripts/download-invoices.ts <fromYear> [toYear]
-```
+| `data/config/partners.json` | Customer definitions                               |
+| `data/config/clockify.json` | Clockify billing rates and overrides               |
+| `data/config/templates/`    | Invoice templates (generated from latest invoice)  |
+| `data/db/invoices/`         | Downloaded XMLs, rendered HTMLs, and PDFs          |
+| `data/db/downloads/`        | For OTP statements                                 |
 
 ## Project structure
 

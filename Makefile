@@ -1,6 +1,6 @@
 INVOICE ?=
 
-.PHONY: install generate-default-template download create storno render typecheck start
+.PHONY: *
 
 install:
 	npm install
@@ -22,11 +22,32 @@ download:
 	npx tsx apps/tui/src/scripts/download-invoices.ts $(FROM) $(TO)
 
 QUANTITY ?=
-create:
-	npx tsx apps/tui/src/scripts/create-invoice.ts $(QUANTITY)
 
-storno:
-	npx tsx apps/tui/src/scripts/storno-invoice.ts $(INVOICE)
+clockify-getPreviousMonthReport:
+	npx tsx apps/tui/src/scripts/clockify-report.ts
 
-render:
+nav-createXml:
+	npx tsx apps/tui/src/scripts/build-invoice.ts $(QUANTITY)
+
+nav-createStornoXml:
+	npx tsx apps/tui/src/scripts/build-storno.ts
+
+nav-lastXml-review:
+	npx tsx apps/tui/src/scripts/review-invoice.ts $(INVOICE)
+
+nav-lastXml-send:
+	npx tsx apps/tui/src/scripts/send-invoice.ts $(INVOICE)
+
+nav-lastXml-renderPdf:
 	npx tsx apps/tui/src/scripts/render-invoice.ts $(INVOICE)
+
+otp-downloadStatement:
+	npx tsx apps/tui/src/scripts/download-statement.ts
+
+rutin:
+	make clockify-getPreviousMonthReport \
+	nav-createXml \
+	nav-lastXml-review \
+	nav-lastXml-send \
+	nav-lastXml-renderPdf \
+	otp-downloadStatement

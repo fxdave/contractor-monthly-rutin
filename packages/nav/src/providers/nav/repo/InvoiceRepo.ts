@@ -44,6 +44,25 @@ export class InvoiceRepo {
     };
   }
 
+  isSent(invoiceNumber: string): boolean {
+    return existsSync(this.filePath(invoiceNumber, "transactionId"));
+  }
+
+  markSent(invoiceNumber: string, transactionId: string): void {
+    writeFileSync(this.filePath(invoiceNumber, "transactionId"), transactionId, "utf8");
+  }
+
+  async getPreviousInvoiceNumber(invoiceNumber: string): Promise<string | null> {
+    const entries = await fs.readdir(this._invoicesFolderPath, { withFileTypes: true });
+    const invoiceDirs = entries
+      .filter((e) => e.isDirectory() && /^\d{4}-\d{6}$/.test(e.name))
+      .map((e) => e.name)
+      .sort();
+    const idx = invoiceDirs.indexOf(invoiceNumber);
+    if (idx <= 0) return null;
+    return invoiceDirs[idx - 1];
+  }
+
   async getNextInvoiceNumber(lastNumber?: string): Promise<string> {
     if (!lastNumber) lastNumber = (await this.getLastInvoiceFile()).number;
     const match = lastNumber.match(/^(\d{4})-(\d+)$/);

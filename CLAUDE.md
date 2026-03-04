@@ -33,15 +33,19 @@ make storno INVOICE=2026-000005
 
 # Render to HTML + PDF
 make render INVOICE=2026-000005       # Requires `weasyprint` on PATH for PDF
-```
 
-To run a single script directly:
-```bash
-npx tsx apps/tui/src/scripts/create-invoice.ts <quantity> [product-id]
-npx tsx apps/tui/src/scripts/download-invoices.ts <fromYear> [toYear]
+# Pipeline: step-by-step invoicing workflow
+make clockify-getPreviousMonthReport  # Clockify hours + billing summary
+make nav-createXml QUANTITY=40        # Build invoice XML locally (no NAV send)
+make nav-createStornoXml INVOICE=2026-000005  # Build storno XML locally
+make nav-lastXml-review               # Review last (or specific) invoice details
+make nav-lastXml-send                 # Submit saved XML to NAV (y/N confirmation)
+make nav-lastXml-renderPdf            # Render invoice to HTML + PDF
+make otp-downloadStatement            # Download OTP bank statement
 ```
 
 TypeScript type-check all packages:
+
 ```bash
 npx turbo typecheck
 ```
@@ -92,7 +96,7 @@ packages/
 apps/
   tui/                        <- tui: Interactive TUI app
     src/
-      main.ts                 <- TUI entry point (menu-driven with @inquirer/prompts)
+      main.ts                 <- TUI entry point
       config.ts               <- Reads .env, constructs configs for all packages
       scripts/                <- CLI entrypoints (one per operation, use package APIs)
 ```
