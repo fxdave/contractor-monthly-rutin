@@ -5,6 +5,7 @@ import {
   NavInvoicingProvider,
   InvoiceService,
   InvoiceRepo,
+  type InvoiceData,
   type InvoiceModifications,
 } from "nav";
 import {
@@ -187,7 +188,13 @@ async function main() {
   console.log(`Gross:         ${grossAmount.toLocaleString("hu-HU")} HUF`);
   console.log();
 
-  const templateData = await provider.getInvoiceData(templateNumber);
+  const templatePath = join(CONFIG_DIR, "templates", "default.json");
+  if (!existsSync(templatePath)) {
+    console.error(`Default template not found: ${templatePath}`);
+    console.error("Run 'make generate-default-template' first.");
+    process.exit(1);
+  }
+  const templateData: InvoiceData = JSON.parse(readFileSync(templatePath, "utf8"));
   const mods: InvoiceModifications = {
     invoiceNumber: nextNumber,
     issueDate,

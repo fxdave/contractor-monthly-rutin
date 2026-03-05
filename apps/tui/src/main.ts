@@ -211,7 +211,13 @@ async function handleCreateInvoice() {
     return;
   }
 
-  const templateData = await provider.getInvoiceData(templateNumber);
+  const templatePath = join(TEMPLATES_DIR, "default.json");
+  if (!existsSync(templatePath)) {
+    console.error(`Default template not found: ${templatePath}`);
+    console.error("Run 'make generate-default-template' first.");
+    return;
+  }
+  const templateData: InvoiceData = JSON.parse(readFileSync(templatePath, "utf8"));
   const mods: InvoiceModifications = {
     invoiceNumber: nextNumber,
     issueDate,
