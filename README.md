@@ -10,6 +10,7 @@ Integrates with the Hungarian [NAV Online Szamla API v3](https://onlineszamla.na
 - **Create/Storno invoices** using templates and overrides with NAV integration
 - **Reads clockify** and can calculate final price based on the configurable hourly rates/project
 - **Download account statement** from OTP's smart bank (the old one)
+- **Download invoices from email** via IMAP (e.g. Anthropic invoices)
 
 ## Prerequisites
 
@@ -38,6 +39,7 @@ make nav-lastXml-review               # Review the saved invoice XML
 make nav-lastXml-send                 # Submit to NAV ⚠️(ensure compliance with law)
 make nav-lastXml-renderPdf            # Render to HTML + PDF ⚠️(ensure compliance with law)
 make otp-downloadStatement            # Download bank statement
+make mail-downloadAnthropicInvoices   # Download Anthropic invoices from email
 ```
 
 ### Monthly rutin in one command
@@ -60,7 +62,7 @@ All runtime data lives in `data/` (gitignored):
 | `data/config/clockify.json` | Clockify billing rates and overrides               |
 | `data/config/templates/`    | Invoice templates (generated from latest invoice)  |
 | `data/db/invoices/`         | Downloaded XMLs, rendered HTMLs, and PDFs          |
-| `data/db/downloads/`        | For OTP statements                                 |
+| `data/db/downloads/`        | For OTP statements and email attachments           |
 
 ## Project structure
 
@@ -69,6 +71,7 @@ packages/
   nav/          NAV Online Szamla API integration
   clockify/     Clockify time tracking integration
   otp/          OTP Bank statement automation (Playwright)
+  mail/         Generic IMAP email attachment downloader
 apps/
   tui/          Interactive TUI app and CLI scripts
 ```

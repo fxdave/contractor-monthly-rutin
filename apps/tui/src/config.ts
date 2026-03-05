@@ -12,6 +12,7 @@ import { execSync } from "node:child_process";
 import type { NavConfig, SupplierExtras } from "nav";
 import type { ClockifyConfig } from "clockify";
 import type { OtpConfig } from "otp";
+import type { MailConfig } from "mail";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "../../..");
@@ -101,6 +102,15 @@ export function loadOtpConfig(): OtpConfig {
     userId: requireEnv("OTP_USER_ID"),
     accountNumber: requireEnv("OTP_ACCOUNT_NUMBER"),
     password: requireEnv("OTP_PASSWORD"),
+  };
+}
+
+export function loadMailConfig(): MailConfig {
+  return {
+    host: requireEnv("MAIL_HOST"),
+    port: Number(optionalEnv("MAIL_PORT") ?? "993"),
+    user: requireEnv("MAIL_USER"),
+    password: requireEnv("MAIL_APP_PASSWORD"),
   };
 }
 

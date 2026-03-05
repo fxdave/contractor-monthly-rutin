@@ -41,6 +41,9 @@ nav-lastXml-send:
 nav-lastXml-renderPdf:
 	npx tsx apps/tui/src/scripts/render-invoice.ts $(INVOICE)
 
+mail-downloadAnthropicInvoices:
+	npx tsx apps/tui/src/scripts/download-anthropic-invoices.ts
+
 otp-downloadStatement:
 	npx tsx apps/tui/src/scripts/download-statement.ts
 

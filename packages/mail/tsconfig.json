@@ -12,12 +12,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "references": [
-    { "path": "packages/nav" },
-    { "path": "packages/clockify" },
-    { "path": "packages/otp" },
-    { "path": "packages/mail" },
-    { "path": "apps/tui" }
-  ],
-  "include": []
+  "include": ["src/**/*.ts"]
 }
