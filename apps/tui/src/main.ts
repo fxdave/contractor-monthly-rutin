@@ -11,10 +11,12 @@ import {
 } from "nav";
 import { ClockifyService } from "clockify";
 import { OtpService } from "otp";
+import { SheetHappensService } from "sheethappens";
 import {
   loadNavConfig,
   loadClockifyConfig,
   loadOtpConfig,
+  loadSheetHappensConfig,
   INVOICES_DIR,
   COUNTER_FILE,
   CONFIG_DIR,
@@ -402,6 +404,30 @@ async function handleOtp() {
   console.log(`Saved: ${filePath}`);
 }
 
+async function handleSheetHappens() {
+  let config;
+  try {
+    config = loadSheetHappensConfig();
+  } catch {
+    console.error("Sheet Happens config missing.");
+    return;
+  }
+
+  const sheetHappens = new SheetHappensService(config);
+  const month = await askDefault("Month (YYYY-MM)", SheetHappensService.getPreviousMonthString());
+
+  console.log(`\nFetching timesheet: ${month}...`);
+  const timesheet = await sheetHappens.getTimesheet(month);
+
+  console.log(`\n=== ${timesheet.label} (${timesheet.status}) ===`);
+  for (const project of timesheet.projects) {
+    console.log(
+      `${project.name}: ${project.hours.toFixed(2)}h @ ${project.rate} ${timesheet.currency}/h = ${project.amount} ${timesheet.currency}`,
+    );
+  }
+  console.log(`\nTotal: ${timesheet.amount} ${timesheet.currency} (${timesheet.hours.toFixed(2)}h, ${timesheet.entries} entries)`);
+}
+
 async function main() {
   console.log("Invoice Manager");
   console.log("═══════════════\n");
@@ -414,6 +440,7 @@ async function main() {
     { label: "Generate default template", value: "template" },
     { label: "Clockify hours", value: "clockify" },
     { label: "Setup Clockify", value: "setup-clockify" },
+    { label: "Sheet Happens timesheet", value: "sheethappens" },
     { label: "OTP statement", value: "otp" },
   ]);
 
@@ -425,6 +452,7 @@ async function main() {
     case "template": await handleGenerateTemplate(); break;
     case "clockify": await handleClockify(); break;
     case "setup-clockify": await handleSetupClockify(); break;
+    case "sheethappens": await handleSheetHappens(); break;
     case "otp": await handleOtp(); break;
   }
 

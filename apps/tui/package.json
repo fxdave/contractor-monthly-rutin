@@ -10,6 +10,7 @@
     "nav": "*",
     "clockify": "*",
     "otp": "*",
+    "sheethappens": "*",
     "mail": "*",
     "@inquirer/prompts": "^7.3.2",
     "dotenv": "^17.2.3"

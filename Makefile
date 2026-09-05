@@ -44,11 +44,15 @@ nav-lastXml-renderPdf:
 mail-downloadAnthropicInvoices:
 	npx tsx apps/tui/src/scripts/download-anthropic-invoices.ts
 
+MONTH ?=
+sheethappens-getTimesheet:
+	npx tsx apps/tui/src/scripts/sheethappens-timesheet.ts $(MONTH)
+
 otp-downloadStatement:
 	npx tsx apps/tui/src/scripts/download-statement.ts
 
 rutin:
-	@make --no-print-directory clockify-getPreviousMonthReport && \
+	@make --no-print-directory sheethappens-getTimesheet && \
 	make --no-print-directory nav-createXml && \
 	make --no-print-directory nav-lastXml-review && \
 	make --no-print-directory nav-lastXml-send && \

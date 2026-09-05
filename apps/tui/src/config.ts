@@ -13,6 +13,7 @@ import type { NavConfig, SupplierExtras } from "nav";
 import type { ClockifyConfig } from "clockify";
 import type { OtpConfig } from "otp";
 import type { MailConfig } from "mail";
+import type { SheetHappensConfig } from "sheethappens";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "../../..");
@@ -102,6 +103,17 @@ export function loadOtpConfig(): OtpConfig {
     userId: requireEnv("OTP_USER_ID"),
     accountNumber: requireEnv("OTP_ACCOUNT_NUMBER"),
     password: requireEnv("OTP_PASSWORD"),
+  };
+}
+
+export function loadSheetHappensConfig(): SheetHappensConfig {
+  return {
+    baseUrl: optionalEnv("SHEETHAPPENS_BASE_URL"),
+    email: requireEnv("SHEETHAPPENS_EMAIL"),
+    password: requireEnv("SHEETHAPPENS_PASSWORD"),
+    // Resolved per sign-in, not at load: a TOTP code is only valid for 30s.
+    getTotp: () => requireEnv("SHEETHAPPENS_OTP"),
+    sessionFile: join(DB_DIR, "sheethappens-session.json"),
   };
 }
 
