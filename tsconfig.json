@@ -3,6 +3,7 @@
     "target": "ES2022",
     "module": "ES2022",
     "lib": ["ES2022"],
+    "types": ["node"],
     "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,12 +13,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "references": [
-    { "path": "packages/nav" },
-    { "path": "packages/clockify" },
-    { "path": "packages/otp" },
-    { "path": "packages/mail" },
-    { "path": "apps/tui" }
-  ],
-  "include": []
+  "include": ["packages/*/src/**/*.ts", "apps/*/src/**/*.ts"]
 }
